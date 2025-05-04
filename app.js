@@ -1,12 +1,15 @@
 const express = require('express');
 const path = require('path');
-const mongoRoutes = require('./routes/mongoRoutes');
+const topicRoutes = require('./routes/topicRoutes');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
+app.use("/api", topicRoutes);
 app.use(express.urlencoded({ extended: true }));
+
+
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
