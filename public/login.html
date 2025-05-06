@@ -1,17 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head><title>Login</title></head>
-<body>
-  <h2>Register</h2>
-  <input id="regUser" placeholder="Username">
-  <input id="regPass" type="password" placeholder="Password">
-  <button onclick="register()">Register</button>
+  <head>
+    <title>Login</title>
+  </head>
+  <body>
+    <h2>Register</h2>
+    <input id="regUser" placeholder="Username" />
+    <input id="regPass" type="password" placeholder="Password" />
+    <button onclick="register()">Register</button>
 
-  <h2>Login</h2>
-  <input id="logUser" placeholder="Username">
-  <input id="logPass" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
+    <h2>Login</h2>
+    <form onsubmit="login(); return false;">
+      <label for="logUser">Username</label>
+      <input
+        id="logUser"
+        placeholder="Username"
+        pattern="[A-Za-z0-9]{3,}"
+        title="Username must be at least 3 characters long and contain only letters and numbers"
+        required
+      />
 
-  <script src="script.js"></script>
-</body>
+      <label for="logPass">Password</label>
+      <input
+        id="logPass"
+        type="password"
+        placeholder="Password"
+        maxlength="128"
+        required
+      />
+
+      <button type="submit">Login</button>
+    </form>
+    <div id="loginError" style="color: red"></div>
+
+    <script src="script.js"></script>
+  </body>
 </html>

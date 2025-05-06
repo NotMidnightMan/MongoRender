@@ -17,6 +17,8 @@ async function register() {
 
 // Login
 async function login() {
+  console.log("Login function called"); // Add this line to confirm the function is hit
+
   const username = document.getElementById("logUser").value;
   const password = document.getElementById("logPass").value;
 
@@ -26,16 +28,25 @@ async function login() {
     body: JSON.stringify({ username, password }),
   });
 
+  // const res = await fetch(`${API}/auth/login`, {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify({ username, password }),
+  // });
+
+  console.log("Response received:", res); // Add this line to check the response
+  console.log("Response status:", res.status); // Add this line to check the response status
+
   if (res.ok) {
     const data = await res.json();
     if (data.token) {
       localStorage.setItem("token", data.token);
       window.location = "home.html"; // Redirect to home page
     } else {
-      alert("Login failed");
+      alert("Login failed: token not found");
     }
   } else {
-    alert("Login failed");
+    alert("Login failedddd");
   }
 }
 
