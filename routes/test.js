@@ -39,4 +39,8 @@ router.get('/seed', async (req, res) => {
   }
 });
 
+router.get('/ping', (req, res) => {
+  res.send({ message: 'API is up and running!' });
+});
+
 module.exports = router;
