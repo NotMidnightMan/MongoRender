@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html>
-<head><title>Home</title></head>
-<body>
-  <h1>Your Topics</h1>
-  <div id="topics"></div>
+  <head>
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>Your Topics</h1>
+    <div id="topics"></div>
 
-  <h2>Create Topic</h2>
-  <input id="newTopic" placeholder="Topic Title">
-  <button onclick="createTopic()">Create</button>
+    <h2>Create Topic</h2>
+    <input id="newTopic" placeholder="Topic Title" />
+    <button onclick="createTopic()">Create</button>
 
-  <h2>Available Topics</h2>
-  <div id="available"></div>
+    <h2>Available Topics</h2>
+    <div id="available" class="topic-cards"></div>
+    <!-- Container for topic cards -->
 
-  <h2>Post Message</h2>
-  <input id="topicId" placeholder="Topic ID">
-  <input id="messageContent" placeholder="Message">
-  <button onclick="postMessage()">Post</button>
+    <h2>Post Message</h2>
+    <input id="topicId" placeholder="Topic ID" />
+    <input id="messageContent" placeholder="Message" />
+    <button onclick="postMessage()">Post</button>
 
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>
