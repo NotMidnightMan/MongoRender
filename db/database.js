@@ -14,6 +14,13 @@ const connectDB = async () => {
     // Log the collections in the database
     const collections = await mongoose.connection.db.listCollections().toArray();
     console.log('Collections in the database:', collections.map(c => c.name));
+
+    // Log the documents in each collection
+    for (const collection of collections) {
+      const collectionName = collection.name;
+      const documents = await mongoose.connection.db.collection(collectionName).find({}).toArray();
+      console.log(`Documents in collection "${collectionName}":`, documents);
+    }
   }
 };
 
