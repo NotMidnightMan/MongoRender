@@ -15,7 +15,19 @@ const testRoutes = require("./routes/test");
 const userRoutes = require("./routes/userRoutes");
 
 app.use(express.json()); // Middleware to parse JSON requests
-app.use(session({ secret: "secret", resave: false, saveUninitialized: false }));
+app.use(
+  session({
+    secret: "secret", // Replace with a secure secret
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use((req, res, next) => {
+  console.log(`[DEBUG] Static file request: ${req.url}`);
+  next();
+});
+app.use(express.static("public"));
 
 // Example root route
 app.get("/", (req, res) => {
@@ -38,7 +50,8 @@ app.get("/test-db", async (req, res) => {
 
 app.use("/api/auth", authRoutes); // Mount auth routes
 console.log("Auth routes mounted at /api/auth");
-app.use("/api", topicRoutes);
+app.use("/api/topics", topicRoutes);
+console.log("Topic routes mounted at /api/topics");
 app.use("/messages", messageRoutes);
 app.use("/stats", statsRoutes);
 app.use("/test", testRoutes);

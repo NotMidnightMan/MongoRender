@@ -22,36 +22,39 @@ async function login() {
   const username = document.getElementById("logUser").value;
   const password = document.getElementById("logPass").value;
 
-  const res = await fetch(`${API}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+  console.log("Username:", username);
+  console.log("Password:", password);
 
-  // const res = await fetch(`${API}/auth/login`, {
-  //   method: "POST",
-  //   headers: { "Content-Type": "application/json" },
-  //   body: JSON.stringify({ username, password }),
-  // });
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
 
-  console.log("Response received:", res); // Add this line to check the response
-  console.log("Response status:", res.status); // Add this line to check the response status
+    console.log("Response received:", res);
+    console.log("Response status:", res.status);
 
-  if (res.ok) {
-    const data = await res.json();
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      window.location = "home.html"; // Redirect to home page
+    if (res.ok) {
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", username); // Store the username
+        window.location = "home.html"; // Redirect to home page
+      } else {
+        alert("Login failed: token not found");
+      }
     } else {
-      alert("Login failed: token not found");
+      alert("Login faileddd");
     }
-  } else {
-    alert("Login failedddd");
+  } catch (error) {
+    console.error("Error during fetch:", error);
   }
 }
 
 // Fetch subscribed topics + messages
 async function loadHome() {
+  console.log("Loading home topics..."); // Debugging line
   const res = await fetch(`${API}/topics/home`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -80,15 +83,32 @@ async function loadHome() {
 // Create topic
 async function createTopic() {
   const title = document.getElementById("newTopic").value;
-  await fetch(`${API}/topics/create`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ title }),
-  });
-  loadHome();
+  console.log("Title being sent:", title);
+  console.log("Payload being sent:", JSON.stringify({ title }));
+
+  try {
+    const response = await fetch(`${API}/topics`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title }),
+    });
+
+    console.log("Response received:", response);
+    console.log("Response status:", response.status);
+
+    if (response.ok) {
+      alert("Topic created successfully!");
+      loadHome(); // Refresh the topics list
+    } else {
+      console.log("Failed to create topic");
+      console.log("Response details:", await response.text()); // Log the response body
+    }
+  } catch (error) {
+    console.error("Error during fetch:", error);
+  }
 }
 
 // Unsubscribe
@@ -102,6 +122,7 @@ async function unsubscribe(id) {
 
 // Available topics
 async function loadAvailableTopics() {
+  console.log("Loading available topics..."); // Debugging line
   const res = await fetch(`${API}/topics`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -110,6 +131,7 @@ async function loadAvailableTopics() {
     const topics = await res.json();
     const div = document.getElementById("available");
     div.innerHTML = ""; // Clear existing content
+    console.log("Available topics:", topics); // Debugging line
 
     topics.forEach((topic) => {
       const card = document.createElement("div");
@@ -153,6 +175,21 @@ async function postMessage() {
 
   loadHome();
 }
+
+// Display username
+function displayUsername() {
+  const username = localStorage.getItem("username"); // Retrieve username from localStorage
+  if (username) {
+    document.getElementById("usernameDisplay").textContent = username;
+  } else {
+    document.getElementById("usernameDisplay").textContent = "Guest";
+  }
+}
+
+// Call this function when the page loads
+window.onload = function () {
+  displayUsername();
+};
 
 // Load home page content on visit
 if (window.location.pathname.endsWith("home.html")) {

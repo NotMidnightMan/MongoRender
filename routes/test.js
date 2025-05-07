@@ -1,46 +1,46 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const User = require('../models/User');
-const Topic = require('../models/Topic');
-const Message = require('../models/Message');
+const User = require("../models/User");
+const Topic = require("../models/Topic");
+const Message = require("../models/Message");
 
-router.get('/seed', async (req, res) => {
+router.get("/seed", async (req, res) => {
   try {
     let user = await User.findOne();
     if (!user) {
       user = await User.create({
-        username: 'testuser',
-        password: 'hashedpassword', // Ideally hash this
-        subscriptions: []
+        username: "testuser",
+        password: "hashedpassword", // Ideally hash this
+        subscriptions: [],
       });
     }
 
     const topic = await Topic.create({
-      title: 'Test Topic',
-      createdBy: user._id,
+      title: "Test Topic",
+      createdBy: user.username, // Use username instead of user._id
       subscribers: [user._id],
-      accessCount: 0
+      accessCount: 0,
     });
 
     await Message.create({
       topic: topic._id,
       user: user._id,
-      content: 'Hello, this is a test message!'
+      content: "Hello, this is a test message!",
     });
 
     user.subscriptions.push(topic._id);
     await user.save();
 
-    res.json({ message: 'Seeded user, topic, and message.', user, topic });
+    res.json({ message: "Seeded user, topic, and message.", user, topic });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to seed test data' });
+    res.status(500).json({ error: "Failed to seed test data" });
   }
 });
 
-router.get('/ping', (req, res) => {
-  res.send({ message: 'API is up and running!' });
+router.get("/ping", (req, res) => {
+  res.send({ message: "API is up and running!" });
 });
 
 module.exports = router;

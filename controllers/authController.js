@@ -22,25 +22,23 @@ class AuthController {
   }
 
   static async login(req, res) {
-    console.log("Login request received:", req.body); // Add this line
     try {
       const { username, password } = req.body;
 
-      // Find the user by username
       const user = await User.findOne({ username });
       if (!user) {
         return res.status(401).json({ error: "Invalid username or password" });
       }
 
-      // Compare the password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return res.status(401).json({ error: "Invalid username or password" });
       }
 
-      // Generate a JWT token
-      const token = jwt.sign({ id: user._id }, "secret", { expiresIn: "1h" });
+      // Set session user
+      req.session.user = { _id: user._id, username: user.username };
 
+      const token = jwt.sign({ id: user._id }, "secret", { expiresIn: "1h" });
       res.json({ token });
     } catch (error) {
       console.error("Error logging in:", error);
