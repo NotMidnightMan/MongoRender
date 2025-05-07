@@ -19,7 +19,9 @@
     <!-- Container for topic cards -->
 
     <h2>Post Message</h2>
-    <input id="topicId" placeholder="Topic ID" />
+    <select id="topicTitle">
+      <option value="" disabled selected>Select a Topic</option>
+    </select>
     <input id="messageContent" placeholder="Message" />
     <button onclick="postMessage()">Post</button>
 

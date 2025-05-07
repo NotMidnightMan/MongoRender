@@ -113,7 +113,7 @@ async function createTopic() {
 
 // Unsubscribe
 async function unsubscribe(id) {
-  await fetch(`${API}/topics/unsubscribe/${id}`, {
+  await fetch(`${API}/topics/${id}/unsubscribe`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -122,7 +122,7 @@ async function unsubscribe(id) {
 
 // Available topics
 async function loadAvailableTopics() {
-  console.log("Loading available topics..."); // Debugging line
+  console.log("Loading available topics...");
   const res = await fetch(`${API}/topics`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -130,10 +130,13 @@ async function loadAvailableTopics() {
   if (res.ok) {
     const topics = await res.json();
     const div = document.getElementById("available");
-    div.innerHTML = ""; // Clear existing content
-    console.log("Available topics:", topics); // Debugging line
+    const select = document.getElementById("topicTitle"); // Dropdown for topic titles
+    div.innerHTML = "";
+    select.innerHTML =
+      '<option value="" disabled selected>Select a Topic</option>'; // Reset dropdown
 
     topics.forEach((topic) => {
+      // Populate topic cards
       const card = document.createElement("div");
       card.className = "topic-card";
       card.innerHTML = `
@@ -141,9 +144,23 @@ async function loadAvailableTopics() {
         <p>Created By: ${topic.createdBy || "Unknown"}</p>
         <p>Subscribers: ${topic.subscribers.length}</p>
         <p>Access Count: ${topic.accessCount}</p>
+        <h4>Messages:</h4>
+        <ul>
+          ${
+            topic.messages
+              .map((message) => `<li>${message.content}</li>`)
+              .join("") || "<li>No messages yet</li>"
+          }
+        </ul>
         <button onclick="subscribe('${topic._id}')">Subscribe</button>
       `;
       div.appendChild(card);
+
+      // Populate dropdown
+      const option = document.createElement("option");
+      option.value = topic.title;
+      option.textContent = topic.title;
+      select.appendChild(option);
     });
   } else {
     console.error("Failed to load available topics");
@@ -152,7 +169,8 @@ async function loadAvailableTopics() {
 
 // Subscribe
 async function subscribe(id) {
-  await fetch(`${API}/topics/subscribe/${id}`, {
+  await fetch(`${API}/topics/${id}/subscribe`, {
+    // Correct endpoint
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -161,19 +179,52 @@ async function subscribe(id) {
 
 // Post message
 async function postMessage() {
-  const topicId = document.getElementById("topicId").value;
+  const topicTitle = document.getElementById("topicTitle").value; // Get the topic title
   const content = document.getElementById("messageContent").value;
 
-  await fetch(`${API}/messages`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ topicId, content }),
-  });
+  try {
+    // Fetch the topic by title to get its ID
+    const topicResponse = await fetch(`${API}/topics`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-  loadHome();
+    if (!topicResponse.ok) {
+      console.error("Failed to fetch topics");
+      console.log("Response status:", topicResponse.status);
+      console.log("Response details:", await topicResponse.text());
+      return;
+    }
+
+    const topics = await topicResponse.json();
+    const topic = topics.find((t) => t.title === topicTitle);
+
+    if (!topic) {
+      alert("Topic not found");
+      return;
+    }
+
+    const topicId = topic._id; // Extract the topic ID
+
+    // Post the message
+    const response = await fetch(`${API}/messages`, {
+      // Use /api/messages
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ topicId, content }),
+    });
+
+    if (response.ok) {
+      alert("Message posted successfully!");
+      loadHome(); // Refresh the topics list
+    } else {
+      console.error("Failed to post message:", await response.text());
+    }
+  } catch (error) {
+    console.error("Error posting message:", error);
+  }
 }
 
 // Display username

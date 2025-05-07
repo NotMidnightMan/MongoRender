@@ -7,6 +7,8 @@ class MessageController {
     try {
       const { topicId, content } = req.body;
       const userId = req.session.user._id; // Assuming session contains the logged-in user
+      console.log("Request body:", req.body);
+      console.log("Session user:", req.session.user);
 
       // Create a new message
       const message = new Message({

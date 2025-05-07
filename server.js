@@ -52,7 +52,7 @@ app.use("/api/auth", authRoutes); // Mount auth routes
 console.log("Auth routes mounted at /api/auth");
 app.use("/api/topics", topicRoutes);
 console.log("Topic routes mounted at /api/topics");
-app.use("/messages", messageRoutes);
+app.use("/api/messages", messageRoutes);
 app.use("/stats", statsRoutes);
 app.use("/test", testRoutes);
 app.use("/api/users", userRoutes); // Mount user routes

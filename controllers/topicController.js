@@ -131,7 +131,12 @@ class TopicController {
   static async getAllTopics(req, res) {
     console.log("Fetching all topics");
     try {
-      const topics = await Topic.find();
+      const topics = await Topic.find().populate({
+        path: "messages",
+        options: { limit: 2, sort: { createdAt: 1 } }, // Fetch the first two messages sorted by creation date
+        select: "content createdAt", // Only include the content and createdAt fields
+      });
+
       console.log("Topics fetched successfully:", topics); // Debugging log
       res.json(topics);
     } catch (err) {
@@ -142,17 +147,26 @@ class TopicController {
 
   static async getHomeTopics(req, res) {
     try {
+      if (!req.session.user) {
+        console.error("Session user is undefined. User is not logged in.");
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
       const userId = req.session.user._id;
+      console.log("Session user:", req.session.user);
+
       const user = await User.findById(userId).populate({
         path: "subscribedTopics",
-        populate: { path: "messages", select: "content createdAt" }, // Populate messages within topics
+        populate: { path: "messages", select: "content createdAt" },
       });
 
       if (!user) {
+        console.error("User not found in the database.");
         return res.status(404).json({ error: "User not found" });
       }
 
-      res.json(user.subscribedTopics); // Return the subscribed topics
+      console.log("Subscribed topics:", user.subscribedTopics);
+      res.json(user.subscribedTopics);
     } catch (err) {
       console.error("Error fetching home topics:", err);
       res.status(500).json({ error: "Failed to fetch home topics" });
