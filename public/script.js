@@ -66,7 +66,7 @@ async function loadHome() {
       .map(
         (t) => `
         <div>
-          <h3>${t.title}</h3>
+          <h3><a href="#" onclick="expandTopic('${t._id}')">${t.title}</a></h3>
           <h4>Messages:</h4>
           <ul>
             ${
@@ -248,6 +248,46 @@ function displayUsername() {
     document.getElementById("usernameDisplay").textContent = username;
   } else {
     document.getElementById("usernameDisplay").textContent = "Guest";
+  }
+}
+
+// Expand topic details
+async function expandTopic(topicId) {
+  console.log(`Fetching details for topic ID: ${topicId}`);
+  const res = await fetch(`${API}/topics/${topicId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (res.ok) {
+    const topic = await res.json();
+    const div = document.getElementById("topics");
+    div.innerHTML = `
+      <div>
+        <h2>${topic.title}</h2>
+        <p>Created By: ${topic.createdBy}</p>
+        <p>Access Count: ${topic.accessCount}</p>
+        <h4>Messages:</h4>
+        <ul>
+          ${
+            topic.messages.length > 0
+              ? topic.messages
+                  .map(
+                    (m) =>
+                      `<li><strong>${m.user?.username || "Unknown"}:</strong> ${
+                        m.content
+                      } <em>(${new Date(
+                        m.createdAt
+                      ).toLocaleString()})</em></li>`
+                  )
+                  .join("")
+              : "<li>No messages yet</li>"
+          }
+        </ul>
+        <button onclick="loadHome()">Back to Topics</button>
+      </div>
+    `;
+  } else {
+    console.error("Failed to fetch topic details");
   }
 }
 

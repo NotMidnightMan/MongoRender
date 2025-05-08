@@ -18,17 +18,27 @@ class TopicController {
         return res.status(400).json({ error: "Invalid topic ID" });
       }
 
-      const topic = await Topic.findById(req.params.id).populate("subscribers");
+      // Fetch the topic and populate messages with user details
+      const topic = await Topic.findById(req.params.id)
+        .populate({
+          path: "messages",
+          populate: { path: "user", select: "username" }, // Populate user field with username
+          options: { sort: { createdAt: -1 } }, // Sort messages by most recent
+        })
+        .populate("subscribers", "username"); // Optionally populate subscribers
+
       if (!topic) {
         return res.status(404).json({ error: "Topic not found" });
       }
 
+      // Increment the access count
       topic.accessCount = (topic.accessCount || 0) + 1;
       await topic.save();
+
       res.json(topic);
     } catch (err) {
       console.error("Error fetching topic:", err);
-      res.status(500).json({ error: "Failed to fetch topicccc" });
+      res.status(500).json({ error: "Failed to fetch topic" });
     }
   }
 
