@@ -54,7 +54,7 @@ async function login() {
 
 // Fetch subscribed topics + messages
 async function loadHome() {
-  console.log("Loading home topics..."); // Debugging line
+  console.log("Loading home topics...");
   const res = await fetch(`${API}/topics/home`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -67,7 +67,23 @@ async function loadHome() {
         (t) => `
         <div>
           <h3>${t.title}</h3>
-          ${t.messages.map((m) => `<p>${m.content}</p>`).join("")}
+          <h4>Messages:</h4>
+          <ul>
+            ${
+              t.messages.length > 0
+                ? t.messages
+                    .map(
+                      (m) =>
+                        `<li><strong>${
+                          m.user?.username || "Unknown"
+                        }:</strong> ${m.content} <em>(${new Date(
+                          m.createdAt
+                        ).toLocaleString()})</em></li>`
+                    )
+                    .join("")
+                : "<li>No messages yet</li>"
+            }
+          </ul>
           <button onclick="unsubscribe('${t._id}')">Unsubscribe</button>
         </div>
       `
@@ -76,8 +92,6 @@ async function loadHome() {
   } else {
     console.error("Failed to load home topics");
   }
-
-  loadAvailableTopics();
 }
 
 // Create topic
@@ -170,11 +184,11 @@ async function loadAvailableTopics() {
 // Subscribe
 async function subscribe(id) {
   await fetch(`${API}/topics/${id}/subscribe`, {
-    // Correct endpoint
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });
-  loadHome();
+  loadHome(); // Refresh "Your Topics"
+  loadAvailableTopics(); // Refresh "Available Topics"
 }
 
 // Post message
@@ -207,7 +221,6 @@ async function postMessage() {
 
     // Post the message
     const response = await fetch(`${API}/messages`, {
-      // Use /api/messages
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -218,7 +231,8 @@ async function postMessage() {
 
     if (response.ok) {
       alert("Message posted successfully!");
-      loadHome(); // Refresh the topics list
+      loadHome(); // Refresh "Your Topics"
+      loadAvailableTopics(); // Refresh "Available Topics"
     } else {
       console.error("Failed to post message:", await response.text());
     }

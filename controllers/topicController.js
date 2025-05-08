@@ -155,9 +155,15 @@ class TopicController {
       const userId = req.session.user._id;
       console.log("Session user:", req.session.user);
 
+      // Fetch the user and populate subscribed topics with the 2 most recent messages
       const user = await User.findById(userId).populate({
         path: "subscribedTopics",
-        populate: { path: "messages", select: "content createdAt" },
+        populate: {
+          path: "messages",
+          options: { limit: 2, sort: { createdAt: -1 } }, // Fetch the 2 most recent messages
+          populate: { path: "user", select: "username" }, // Populate the user field with the username
+          select: "content createdAt user", // Include content, createdAt, and user fields
+        },
       });
 
       if (!user) {
@@ -165,7 +171,7 @@ class TopicController {
         return res.status(404).json({ error: "User not found" });
       }
 
-      console.log("Subscribed topics:", user.subscribedTopics);
+      console.log("Subscribed topics with messages:", user.subscribedTopics);
       res.json(user.subscribedTopics);
     } catch (err) {
       console.error("Error fetching home topics:", err);

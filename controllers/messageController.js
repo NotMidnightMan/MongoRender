@@ -11,6 +11,7 @@ class MessageController {
 
       console.log("Request body:", req.body);
       console.log("Session user:", req.session.user);
+      console.log("User ID:", userId);
 
       // Validate topicId
       if (!mongoose.Types.ObjectId.isValid(topicId)) {
@@ -37,6 +38,17 @@ class MessageController {
       await message.save();
       console.log("Message created:", message);
 
+      // Populate the user field with the username
+      const populatedMessage = await Message.findById(message._id).populate(
+        "user",
+        "username"
+      );
+      if (!populatedMessage) {
+        console.error("Failed to populate the user field for the message.");
+      } else {
+        console.log("Populated message:", populatedMessage);
+      }
+
       // Add the message to the topic's messages array
       console.log("Topic before adding message:", topic);
       topic.messages.push(message._id);
@@ -46,9 +58,10 @@ class MessageController {
       // Notify subscribers of the topic
       topicObserver.notify(topicId, message);
 
-      res
-        .status(201)
-        .json({ message: "Message created successfully", message });
+      res.status(201).json({
+        message: "Message created successfully",
+        message: populatedMessage,
+      });
     } catch (error) {
       console.error("Error creating message:", error);
       res.status(500).json({ error: "Internal server error" });
